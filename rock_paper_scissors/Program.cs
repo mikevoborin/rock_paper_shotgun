@@ -36,15 +36,16 @@ namespace rock_paper_scissors
             {
                 move = GenerateMove(args);
             }
-            else move = move % args.Length + 1;
+            else move = (
+                    (move % args.Length) + 1);
             return move;
         }
         static void PrintHMAC(int move, byte[] key)
         {
             HMACSHA256 hmac = new HMACSHA256(key);
             var hash =hmac.ComputeHash(BitConverter.GetBytes(move));
-            string sHash=BitConverter.ToString(hash);
-            Console.WriteLine(sHash);
+            string sHash=BitConverter.ToString(hash).Replace("-", "");
+            Console.WriteLine("HMAC: {0}",sHash);
         }
         static int InteractingWithUser(string[] args)
         {
@@ -57,7 +58,7 @@ namespace rock_paper_scissors
             bool notInt;
             do
             {
-                Console.Write("Enter your move");
+                Console.Write("Enter your move: ");
                 string input = Console.ReadLine();
                 int number;
                 notInt = false;
@@ -69,13 +70,20 @@ namespace rock_paper_scissors
                 }
                 if (number > args.Length || number < 0)
                 {
-                    Console.WriteLine("Please input number in range 0..",args.Length+1);
+                    Console.WriteLine("Please input number in range 0..{0}",args.Length);
                     notInt = true;
                 }
-                Console.WriteLine("Your move: {0}",args[number-1]);
-                return number;
+                if (!notInt)
+                {
+                    if (number != 0)
+                    {
+                        Console.WriteLine("Your move: {0}", args[number - 1]);
+                    }
+                    return number;
+                }
             }
-            while (notInt); 
+            while (notInt);
+            return -1;
         }
         static void ResultPrinting(int playerMove, int gameMove, int gameParameter)
         {
@@ -83,17 +91,23 @@ namespace rock_paper_scissors
             {
                 if (playerMove < gameMove)
                 {
-                    if (playerMove + gameParameter > gameMove)
+                    if ((playerMove + gameParameter) >= gameMove)
                     {
-                        Console.WriteLine("Player Wins!");
+                        Console.WriteLine("You lose.");
                     }
-                    else Console.WriteLine("Game Wins!");
+                    else
+                    {
+                        Console.WriteLine("You Win!");
+                    }
                 }
-                else if (gameMove + gameParameter > playerMove)
-                     {
-                         Console.WriteLine("Game Wins!");
-                     }
-                     else Console.WriteLine("Player Wins!");         
+                else if ((playerMove - gameParameter) <= gameMove)
+                {
+                    Console.WriteLine("You Win!");
+                }
+                else
+                {
+                    Console.WriteLine("You lose.");                    
+                }         
             }
             else Console.WriteLine("It is a draw!");
         }
@@ -109,8 +123,9 @@ namespace rock_paper_scissors
                 if ( userMove!= 0)
                 {
                     Console.WriteLine("Computer move: {0}",args[move-1]);
-                    ResultPrinting(userMove, move, (args.Length + 1) % 2);
-                    Console.WriteLine("hmackey: {0}", BitConverter.ToString(hmackey));
+                    ResultPrinting(userMove, move,((args.Length - 1) / 2));
+                    string shmackey = BitConverter.ToString(hmackey);
+                    Console.WriteLine("hmackey: {0}", shmackey.Replace("-", ""));
                     Console.ReadKey();
                 }
             }
